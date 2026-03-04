@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CJ대한통운 O-NE 앱 플로우</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0b1d51, #1a3a8a);
+      color: #fff;
+      text-align: center;
+      padding: 40px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      color: #fff;
+      text-decoration: none;
+      padding: 6px 16px;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+
+    .nav a:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: #fff;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 40px 0 8px;
+      padding-left: 16px;
+      border-left: 4px solid #1a3a8a;
+      color: #0b1d51;
+    }
+
+    .section-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 24px;
+      padding-left: 20px;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    .card .step-badge {
+      background: linear-gradient(135deg, #1a3a8a, #2d5fd6);
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card .step-badge .num {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .card .img-wrap {
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      background: #fafafa;
+    }
+
+    .card .img-wrap img {
+      max-width: 100%;
+      max-height: 480px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+
+    .card .card-body {
+      padding: 16px;
+    }
+
+    .card .card-body h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+      color: #1a1a2e;
+    }
+
+    .card .card-body p {
+      font-size: 13px;
+      color: #777;
+      line-height: 1.5;
+    }
+
+    .arrow-connector {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: -8px 0;
+      font-size: 28px;
+      color: #1a3a8a;
+      opacity: 0.4;
+    }
+
+    /* Lightbox */
+    .lightbox-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .lightbox-overlay.active {
+      display: flex;
+    }
+
+    .lightbox-overlay img {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    }
+
+    .lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 30px;
+      color: #fff;
+      font-size: 36px;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #999;
+      font-size: 13px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    @media (max-width: 640px) {
+      header h1 { font-size: 20px; }
+      .flow-grid { grid-template-columns: 1fr; }
+      .section-title { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>CJ대한통운 O-NE 앱 플로우</h1>
+  <p>해외 쇼핑몰 배송 &mdash; 사전접수부터 배송완료까지 전체 프로세스</p>
+  <nav class="nav">
+    <a href="#section-app">1. 앱 사전접수</a>
+    <a href="#section-kiosk">2. 키오스크 현장접수</a>
+    <a href="#section-tracking">3. 배송 추적</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- Section 1: 앱 사전접수 -->
+  <h2 class="section-title" id="section-app">1. 앱 사전접수 (O-NE AIR)</h2>
+  <p class="section-desc">모바일 앱에서 여권정보, 물품신고, 여행자 세관신고, 발송인 등록, 방문처 예약까지 진행합니다.</p>
+
+  <div class="flow-grid">
+
+    <div class="card" onclick="openLightbox('image/01.png')">
+      <div class="step-badge">
+        <span>앱 메인 화면</span>
+        <span class="num">01</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/01.png" alt="01 - 앱 메인" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>O-NE 앱 메인 화면</h3>
+        <p>발송 내역 조회, 사전접수, 해외보관 서비스 예약 등 메인 기능 제공</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/02.png')">
+      <div class="step-badge">
+        <span>배송 현황 확인</span>
+        <span class="num">02</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/02.png" alt="02 - 배송 현황" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>글로벌 배송 현황</h3>
+        <p>일본→한국 배송 진행상태 및 운송장 정보 확인</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/03.png')">
+      <div class="step-badge">
+        <span>STEP 01 - 여권/물품 정보</span>
+        <span class="num">03</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/03.png" alt="03 - STEP 01" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>사전접수 STEP 01</h3>
+        <p>여권 번호, 영문 성명, 만료일자 입력 및 신고 물품 내역 등록</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/04.png')">
+      <div class="step-badge">
+        <span>STEP 02 - 여행자 세관신고</span>
+        <span class="num">04</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/04.png" alt="04 - STEP 02" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>사전접수 STEP 02</h3>
+        <p>관세청 여행자 신고 — 성명, 여권번호, 생년월일, 국내주소 등 입력</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/05.png')">
+      <div class="step-badge">
+        <span>STEP 03 - 발송인 정보</span>
+        <span class="num">05</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/05.png" alt="05 - STEP 03" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>사전접수 STEP 03</h3>
+        <p>발송인 정보 등록 — 개인통관고유부호, 우편번호, 전화번호, 이메일</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/06.png')">
+      <div class="step-badge">
+        <span>STEP 04 - 방문처 선택</span>
+        <span class="num">06</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/06.png" alt="06 - STEP 04 방문처" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>사전접수 STEP 04</h3>
+        <p>지도에서 방문 가능한 사업소를 선택하여 방문처 등록</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/07.png')">
+      <div class="step-badge">
+        <span>예약 완료 (QR 발급)</span>
+        <span class="num">07</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/07.png" alt="07 - 예약 완료" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>사전접수 완료</h3>
+        <p>예약 완료 후 QR 코드 발급 — 키오스크에서 인식하여 현장 접수 진행</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Section 2: 키오스크 현장접수 -->
+  <h2 class="section-title" id="section-kiosk">2. 키오스크 현장접수</h2>
+  <p class="section-desc">사업소 방문 후 키오스크에서 QR 스캔, 여권 인증, 정보 확인, 무게 측정까지 진행합니다.</p>
+
+  <div class="flow-grid">
+
+    <div class="card" onclick="openLightbox('image/10.png')">
+      <div class="step-badge">
+        <span>키오스크 메인</span>
+        <span class="num">10</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/10.png" alt="10 - 키오스크 메인" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>키오스크 메인 화면</h3>
+        <p>서비스 설명, 사전 등록 QR, 등록 정보 수정 및 현장 접수 시작</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/11.png')">
+      <div class="step-badge">
+        <span>주의사항 안내</span>
+        <span class="num">11</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/11.png" alt="11 - 주의사항" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>주의사항 (CAUTION)</h3>
+        <p>통관 제한 품목 안내 — 담배, 다이어트 제품, 주사기, 반찬류, 농산물, 육포 등</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/12.png')">
+      <div class="step-badge">
+        <span>QR 코드 스캔</span>
+        <span class="num">12</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/12.png" alt="12 - QR 스캔" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>사전 예약자 QR 스캔</h3>
+        <p>사전 등록 시 발급 받은 QR 코드를 키오스크에서 스캔</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/13.png')">
+      <div class="step-badge">
+        <span>여권 스캔 인증</span>
+        <span class="num">13</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/13.png" alt="13 - 본인 확인" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>본인 확인</h3>
+        <p>여권을 리더기에 스캔하여 본인 인증 진행</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/14.png')">
+      <div class="step-badge">
+        <span>등록 정보 확인</span>
+        <span class="num">14</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/14.png" alt="14 - 정보 확인" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>등록 정보 확인</h3>
+        <p>사전 등록 정보(이름, 여권번호, 물품명, 수량, 금액) 확인 후 무게 측정 시작</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/15.png')">
+      <div class="step-badge">
+        <span>무게 측정</span>
+        <span class="num">15</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/15.png" alt="15 - 무게 측정" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>무게 측정 시작</h3>
+        <p>저울 위에 짐을 올려 무게 측정 — 소형 4.8kg, 예상 금액 5,000엔</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/16.png')">
+      <div class="step-badge">
+        <span>접수 완료</span>
+        <span class="num">16</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/16.png" alt="16 - 완료" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>현장 접수 완료!</h3>
+        <p>접수 완료 — "한국에서 봐!" 메시지와 함께 홈으로 돌아가기</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Section 3: 배송 추적 -->
+  <h2 class="section-title" id="section-tracking">3. 배송 추적</h2>
+  <p class="section-desc">접수 완료 후 앱에서 통관, 배송 상태를 실시간으로 추적합니다.</p>
+
+  <div class="flow-grid">
+
+    <div class="card" onclick="openLightbox('image/20.png')">
+      <div class="step-badge">
+        <span>통관 중</span>
+        <span class="num">20</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/20.png" alt="20 - 통관 중" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>통관 진행 중</h3>
+        <p>관세청 방문하기, 사진 등록, 정부24 방문하기 등 통관 프로세스 안내</p>
+      </div>
+    </div>
+
+    <div class="card" onclick="openLightbox('image/21.png')">
+      <div class="step-badge">
+        <span>배송 중</span>
+        <span class="num">21</span>
+      </div>
+      <div class="img-wrap">
+        <img src="image/21.png" alt="21 - 배송 중" loading="lazy">
+      </div>
+      <div class="card-body">
+        <h3>국내 배송 중</h3>
+        <p>인천 ICC 센터 → 곤지암 Mega HUB → 관악 2 SUB 등 실시간 배송 추적</p>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+  <span class="lightbox-close">&times;</span>
+  <img id="lightbox-img" src="" alt="확대 이미지">
+</div>
+
+<footer>
+  CJ대한통운 O-NE &mdash; 해외 쇼핑짐 배송 서비스 앱 플로우 문서
+</footer>
+
+<script>
+  function openLightbox(src) {
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+</script>
+
+</body>
+</html>
